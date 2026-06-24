@@ -1,0 +1,8 @@
+{"type":"server-started","port":63218,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:63218","screen_dir":"/Users/fschiozer/Documents/Training/Claude/alura/.superpowers/brainstorm/4996-1781804051/content","state_dir":"/Users/fschiozer/Documents/Training/Claude/alura/.superpowers/brainstorm/4996-1781804051/state"}
+{"type":"screen-added","file":"/Users/fschiozer/Documents/Training/Claude/alura/.superpowers/brainstorm/4996-1781804051/content/user-persona.html"}
+{"source":"user-event","type":"click","text":"B\n    \n      Para familiares / amigos\n      Vou ajudar outras pessoas a acompanharem a glicemia delas\n      Pode exigir múltiplos usuários ou compartilhamento","choice":"family","id":null,"timestamp":1781804109822}
+{"type":"screen-added","file":"/Users/fschiozer/Documents/Training/Claude/alura/.superpowers/brainstorm/4996-1781804051/content/multi-user-scenario.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      Uma pessoa, um dispositivo\n      Cada pessoa terá seu próprio celular/computador e fará login no próprio app\n      Mais simples, cada um gerencia seus dados","choice":"single-device","id":null,"timestamp":1781804217162}
+{"type":"screen-added","file":"/Users/fschiozer/Documents/Training/Claude/alura/.superpowers/brainstorm/4996-1781804051/content/diabetes-type.html"}
+{"type":"screen-added","file":"/Users/fschiozer/Documents/Training/Claude/alura/.superpowers/brainstorm/4996-1781804051/content/data-tracking.html"}
+{"type":"server-stopped","reason":"idle timeout"}

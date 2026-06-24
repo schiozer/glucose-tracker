@@ -1,0 +1,47 @@
+<h2>Qual situação você quer cobrir?</h2>
+<p class="subtitle">Isso afeta a frequência de medições e funcionalidades necessárias</p>
+
+<div class="section">
+  <p><strong>Contexto:</strong></p>
+  <ul style="text-align: left; max-width: 600px; margin: 0 auto 2rem;">
+    <li><strong>Tipo 1:</strong> Múltiplas medições por dia, registro de insulina, contagem de carboidratos</li>
+    <li><strong>Tipo 2:</strong> Menos medições, foco em dieta/exercício, eventualmente medicamentos</li>
+    <li><strong>Pré-diabetes:</strong> Monitoramento preventivo, menos frequente</li>
+  </ul>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="type1" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Diabetes Tipo 1</h3>
+      <p>Medições múltiplas/dia, insulina, carboidratos</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="type2" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Diabetes Tipo 2</h3>
+      <p>Medições regulares, foco em estilo de vida</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="prediabetes" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Pré-diabetes</h3>
+      <p>Monitoramento preventivo</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="all" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>Todos os casos</h3>
+      <p>App flexível para qualquer situação</p>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 2rem;">Pode selecionar múltiplas opções se fizer sentido</p>
