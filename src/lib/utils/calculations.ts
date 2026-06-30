@@ -13,7 +13,7 @@ import type { GlucoseReading, GlucoseThreshold, GlucoseContext } from '@/types/d
 // Glucose Level Classification
 // ============================================================================
 
-export type GlucoseLevel = 'low' | 'target' | 'high' | 'borderline';
+export type GlucoseLevel = 'low' | 'target' | 'high' | 'unknown';
 
 /**
  * Determine glucose level classification based on value and threshold
@@ -22,7 +22,7 @@ export type GlucoseLevel = 'low' | 'target' | 'high' | 'borderline';
  * - 'low': value < low threshold (hypoglycemia)
  * - 'target': value between target_min and target_max (optimal range)
  * - 'high': value > high threshold (hyperglycemia)
- * - 'borderline': value in transition zones (between low and target_min, or between target_max and high)
+ * - 'unknown': value in transition zones (between low and target_min, or between target_max and high)
  *
  * @param value - Glucose value in mg/dL
  * @param threshold - Threshold configuration
@@ -41,7 +41,7 @@ export function determineGlucoseLevel(
   if (value > threshold.high) {
     return 'high';
   }
-  return 'borderline'; // Between low and target_min, or between target_max and high
+  return 'unknown'; // Between low and target_min, or between target_max and high
 }
 
 // ============================================================================
@@ -57,7 +57,7 @@ export interface GlucoseStats {
   timeInTargetPct: number;
   timeBelowTargetPct: number;
   timeAboveTargetPct: number;
-  timeBorderlinePct: number;
+  timeUnknownPct: number;
 }
 
 /**
@@ -67,7 +67,7 @@ export interface GlucoseStats {
  * - Average glucose value
  * - Minimum and maximum values
  * - Standard deviation (measure of variability)
- * - Time in range percentages (low/target/high/borderline)
+ * - Time in range percentages (low/target/high/unknown)
  *
  * Time in range is calculated by classifying each reading and computing percentages.
  * Requires threshold information for each reading's context.
@@ -92,7 +92,7 @@ export function calculateStats(
       timeInTargetPct: 0,
       timeBelowTargetPct: 0,
       timeAboveTargetPct: 0,
-      timeBorderlinePct: 0,
+      timeUnknownPct: 0,
     };
   }
 
@@ -112,7 +112,7 @@ export function calculateStats(
   let inTarget = 0;
   let belowTarget = 0;
   let aboveTarget = 0;
-  let borderline = 0;
+  let unknown = 0;
 
   readings.forEach((reading) => {
     const threshold = thresholdGetter(reading.context);
@@ -128,8 +128,8 @@ export function calculateStats(
       case 'high':
         aboveTarget++;
         break;
-      case 'borderline':
-        borderline++;
+      case 'unknown':
+        unknown++;
         break;
     }
   });
@@ -145,7 +145,7 @@ export function calculateStats(
     timeInTargetPct: Math.round((inTarget / total) * 100),
     timeBelowTargetPct: Math.round((belowTarget / total) * 100),
     timeAboveTargetPct: Math.round((aboveTarget / total) * 100),
-    timeBorderlinePct: Math.round((borderline / total) * 100),
+    timeUnknownPct: Math.round((unknown / total) * 100),
   };
 }
 
@@ -256,7 +256,7 @@ export function getGlucoseLevelColor(level: GlucoseLevel): string {
       return 'text-green-600';
     case 'high':
       return 'text-orange-600';
-    case 'borderline':
+    case 'unknown':
       return 'text-yellow-600';
     default:
       return 'text-gray-600';
@@ -277,7 +277,7 @@ export function getGlucoseLevelBgColor(level: GlucoseLevel): string {
       return 'bg-green-100';
     case 'high':
       return 'bg-orange-100';
-    case 'borderline':
+    case 'unknown':
       return 'bg-yellow-100';
     default:
       return 'bg-gray-100';
@@ -298,8 +298,8 @@ export function getGlucoseLevelLabel(level: GlucoseLevel): string {
       return 'No Alvo';
     case 'high':
       return 'Alta (Hiperglicemia)';
-    case 'borderline':
-      return 'Limítrofe';
+    case 'unknown':
+      return 'Desconhecido';
     default:
       return 'Desconhecido';
   }

@@ -116,16 +116,16 @@ export interface GetReadingsResult {
 }
 
 /**
- * Get glucose readings for a user with optional filters and pagination
+ * Get glucose readings for a profile with optional filters and pagination
  *
  * @param supabase - Supabase client instance
- * @param userId - User ID to fetch readings for
+ * @param profileId - Profile ID to fetch readings for
  * @param options - Optional filters and pagination parameters
  * @returns Object with readings array and total count
  */
-export async function getReadingsByUserId(
+export async function getReadingsByProfileId(
   supabase: SupabaseClient,
-  userId: string,
+  profileId: string,
   options?: GetReadingsOptions
 ): Promise<GetReadingsResult> {
   const page = options?.page || 1;
@@ -135,7 +135,7 @@ export async function getReadingsByUserId(
   let query = supabase
     .from('glucose_readings')
     .select('*', { count: 'exact' })
-    .eq('user_id', userId);
+    .eq('profile_id', profileId);
 
   if (options?.startDate) {
     query = query.gte('reading_date', options.startDate);
@@ -191,21 +191,45 @@ export async function getReadingById(
 // ============================================================================
 
 /**
- * Get glucose threshold for a user
- * Note: Each user has one set of thresholds
+ * Get all glucose thresholds for a profile
+ * Each profile can have multiple context-specific thresholds
  *
  * @param supabase - Supabase client instance
- * @param userId - User ID to fetch thresholds for
+ * @param profileId - Profile ID to fetch thresholds for
+ * @returns Array of glucose thresholds
+ */
+export async function getThresholdsByProfileId(
+  supabase: SupabaseClient,
+  profileId: string
+): Promise<GlucoseThreshold[]> {
+  const { data, error } = await supabase
+    .from('glucose_thresholds')
+    .select('*')
+    .eq('profile_id', profileId);
+
+  if (error) throw error;
+
+  return data || [];
+}
+
+/**
+ * Get glucose threshold for a specific profile and context
+ *
+ * @param supabase - Supabase client instance
+ * @param profileId - Profile ID to fetch threshold for
+ * @param context - Glucose context
  * @returns Glucose threshold or null if not configured
  */
-export async function getThresholdByUserId(
+export async function getThresholdByProfileAndContext(
   supabase: SupabaseClient,
-  userId: string
+  profileId: string,
+  context: GlucoseContext
 ): Promise<GlucoseThreshold | null> {
   const { data, error } = await supabase
     .from('glucose_thresholds')
     .select('*')
-    .eq('user_id', userId)
+    .eq('profile_id', profileId)
+    .eq('context', context)
     .single();
 
   if (error) {
@@ -293,20 +317,20 @@ export const DEFAULT_THRESHOLDS: Record<
 };
 
 /**
- * Get effective thresholds for a user and context
+ * Get effective thresholds for a profile and context
  * Returns custom threshold if configured, otherwise returns defaults
  *
  * @param supabase - Supabase client instance
- * @param userId - User ID
+ * @param profileId - Profile ID
  * @param context - Glucose context
  * @returns Effective threshold values
  */
 export async function getEffectiveThreshold(
   supabase: SupabaseClient,
-  userId: string,
+  profileId: string,
   context: GlucoseContext
 ): Promise<Pick<GlucoseThreshold, 'low' | 'target_min' | 'target_max' | 'high'>> {
-  const customThreshold = await getThresholdByUserId(supabase, userId);
+  const customThreshold = await getThresholdByProfileAndContext(supabase, profileId, context);
 
   if (customThreshold) {
     return {

@@ -98,7 +98,7 @@ export interface Profile {
  */
 export interface GlucoseReading {
   id: string;                       // UUID
-  user_id: string;                  // Foreign key to users.id
+  profile_id: string;               // Foreign key to profiles.id
   value: number;                    // mg/dL (20-600 range)
   reading_date: string;             // ISO 8601 timestamp (UTC)
   context: GlucoseContext;
@@ -109,11 +109,12 @@ export interface GlucoseReading {
 }
 
 /**
- * Personalized glucose thresholds for a user
+ * Personalized glucose thresholds for a profile by context
  */
 export interface GlucoseThreshold {
   id: string;                       // UUID
-  user_id: string;                  // Foreign key to users.id
+  profile_id: string;               // Foreign key to profiles.id
+  context: GlucoseContext;          // Context for this threshold set
   low: number;                      // Hipoglicemia (mg/dL)
   target_min: number;               // Alvo mínimo (mg/dL)
   target_max: number;               // Alvo máximo (mg/dL)
