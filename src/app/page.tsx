@@ -1,15 +1,23 @@
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <h1 className="text-4xl font-bold">Glucose Tracking App</h1>
-        <p className="text-sm text-center sm:text-left">
-          Sistema de monitoramento de glicemia desenvolvido com Next.js 14
-        </p>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <p className="text-xs">MVP em desenvolvimento</p>
-      </footer>
-    </div>
-  );
+import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/auth0/session';
+
+/**
+ * Root page
+ *
+ * Redirects users based on authentication status:
+ * - Authenticated users -> /dashboard
+ * - Unauthenticated users -> /login
+ *
+ * This page is dynamic because it checks session (uses cookies)
+ */
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  const session = await getSession();
+
+  if (session) {
+    redirect('/dashboard');
+  } else {
+    redirect('/login');
+  }
 }
