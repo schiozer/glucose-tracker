@@ -167,6 +167,36 @@ export interface AuditLog {
   created_at: string;               // ISO 8601 timestamp (UTC)
 }
 
+/**
+ * Web Push API subscription endpoint
+ */
+export interface PushSubscription {
+  id: string;                       // UUID
+  user_id: string;                  // Foreign key to users.id
+  endpoint: string;                 // Push service endpoint URL
+  p256dh: string;                   // User public key for encryption
+  auth: string;                     // Authentication secret
+  user_agent?: string;              // Browser user agent
+  created_at: string;               // ISO 8601 timestamp (UTC)
+  updated_at: string;               // ISO 8601 timestamp (UTC)
+}
+
+/**
+ * LGPD consent tracking
+ */
+export interface UserConsent {
+  id: string;                       // UUID
+  user_id: string;                  // Foreign key to users.id
+  consent_type: 'data_processing' | 'data_sharing' | 'marketing' | 'analytics';
+  given: boolean;                   // Whether consent is currently active
+  given_at: string;                 // ISO 8601 timestamp (UTC)
+  revoked_at?: string;              // ISO 8601 timestamp (UTC)
+  version: string;                  // Version of consent terms
+  ip_address?: string;              // IP address when consent was given
+  user_agent?: string;              // User agent when consent was given
+  created_at: string;               // ISO 8601 timestamp (UTC)
+}
+
 // ============================================================================
 // Helper Types
 // ============================================================================
@@ -181,7 +211,9 @@ export type TableName =
   | 'glucose_thresholds'
   | 'reminders'
   | 'caregiver_access'
-  | 'audit_logs';
+  | 'audit_logs'
+  | 'push_subscriptions'
+  | 'user_consents';
 
 /**
  * Common fields for all database entities
