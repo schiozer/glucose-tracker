@@ -5,17 +5,8 @@
  */
 
 import { NextResponse } from 'next/server';
+import type { HealthCheckResponse } from '@/types/api';
 import { createServerClient } from '@/lib/supabase/server';
-
-interface HealthCheckResponse {
-  status: 'healthy' | 'unhealthy';
-  timestamp: string;
-  checks: {
-    database: 'connected' | 'error';
-    auth: 'configured' | 'error';
-  };
-  version: string;
-}
 
 /**
  * GET /api/health
@@ -25,9 +16,9 @@ interface HealthCheckResponse {
  */
 export async function GET(): Promise<NextResponse<HealthCheckResponse>> {
   const timestamp = new Date().toISOString();
-  const checks = {
-    database: 'error' as const,
-    auth: 'error' as const,
+  const checks: HealthCheckResponse['checks'] = {
+    database: 'error',
+    auth: 'error',
   };
 
   try {
@@ -36,7 +27,7 @@ export async function GET(): Promise<NextResponse<HealthCheckResponse>> {
     const auth0ClientId = process.env.AUTH0_CLIENT_ID;
     const auth0ClientSecret = process.env.AUTH0_CLIENT_SECRET;
 
-    if (auth0Url && auth0ClientId && auth0ClientSecret) {
+    if (auth0Url?.trim() && auth0ClientId?.trim() && auth0ClientSecret?.trim()) {
       checks.auth = 'configured';
     }
 
