@@ -298,7 +298,7 @@ export async function PATCH(
 export async function DELETE(
   _request: NextRequest,
   context: RouteContext
-): Promise<NextResponse<void>> {
+): Promise<NextResponse<ApiResponse<void>>> {
   try {
     // Check authentication
     const session = await getSession();

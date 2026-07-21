@@ -6,49 +6,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession, getUserIdFromSession } from '@/lib/auth0/session';
 import { createServerClient } from '@/lib/supabase/server';
-import { getReadingsByProfileId, getProfileById } from '@/lib/supabase/queries';
+import { getReadingsByProfileId } from '@/lib/supabase/queries';
 import { createReadingSchema, listReadingsQuerySchema } from '@/lib/validations/schemas';
+import { checkProfileAccess } from '@/lib/auth/access-control';
 import type { ApiResponse, CreateReadingRequest, PaginatedResponse } from '@/types/api';
 import type { GlucoseReading } from '@/types/database';
 import { ApiErrorCode } from '@/types/api';
-
-/**
- * Check if user has access to a profile
- * Returns access info to avoid redundant queries
- */
-async function checkProfileAccess(
-  supabase: ReturnType<typeof createServerClient>,
-  userId: string,
-  profileId: string
-): Promise<{ hasAccess: boolean; accessLevel?: 'owner' | 'read' | 'write' }> {
-  const profile = await getProfileById(supabase, profileId);
-
-  if (!profile) {
-    return { hasAccess: false };
-  }
-
-  if (profile.user_id === userId) {
-    return { hasAccess: true, accessLevel: 'owner' };
-  }
-
-  // Check caregiver access
-  const { data: caregiverAccess, error } = await supabase
-    .from('caregiver_access')
-    .select('access_level')
-    .eq('patient_id', profile.user_id)
-    .eq('caregiver_id', userId)
-    .eq('revoked', false)
-    .single();
-
-  if (error || !caregiverAccess) {
-    return { hasAccess: false };
-  }
-
-  return {
-    hasAccess: true,
-    accessLevel: caregiverAccess.access_level as 'read' | 'write',
-  };
-}
 
 /**
  * GET /api/readings
@@ -57,7 +20,7 @@ async function checkProfileAccess(
  */
 export async function GET(
   request: NextRequest
-): Promise<NextResponse<PaginatedResponse<GlucoseReading>>> {
+): Promise<NextResponse<PaginatedResponse<GlucoseReading> | ApiResponse<never>>> {
   try {
     // Check authentication
     const session = await getSession();

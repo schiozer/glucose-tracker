@@ -8,48 +8,14 @@ import { getSession, getUserIdFromSession } from '@/lib/auth0/session';
 import { createServerClient } from '@/lib/supabase/server';
 import {
   getReadingsByProfileId,
-  getProfileById,
   getEffectiveThreshold,
   DEFAULT_THRESHOLDS,
 } from '@/lib/supabase/queries';
 import { calculateStats } from '@/lib/utils/calculations';
+import { checkProfileAccess } from '@/lib/auth/access-control';
 import type { ApiResponse } from '@/types/api';
 import type { GlucoseContext } from '@/types/database';
 import { ApiErrorCode } from '@/types/api';
-
-/**
- * Check if user has access to a profile
- */
-async function checkProfileAccess(
-  supabase: ReturnType<typeof createServerClient>,
-  userId: string,
-  profileId: string
-): Promise<{ hasAccess: boolean }> {
-  const profile = await getProfileById(supabase, profileId);
-
-  if (!profile) {
-    return { hasAccess: false };
-  }
-
-  if (profile.user_id === userId) {
-    return { hasAccess: true };
-  }
-
-  // Check caregiver access
-  const { data: caregiverAccess, error } = await supabase
-    .from('caregiver_access')
-    .select('access_level')
-    .eq('patient_id', profile.user_id)
-    .eq('caregiver_id', userId)
-    .eq('revoked', false)
-    .single();
-
-  if (error || !caregiverAccess) {
-    return { hasAccess: false };
-  }
-
-  return { hasAccess: true };
-}
 
 export interface ReadingStats {
   period: {
@@ -152,11 +118,15 @@ export async function GET(
     }
 
     // Fetch readings with filters (no pagination for stats)
+    // Note: perPage is set to a high limit to fetch all readings for accurate statistics
+    // For profiles with very large datasets (>10000 readings), consider implementing
+    // server-side aggregation or adding pagination to stats endpoint
+    const MAX_READINGS_FOR_STATS = 10000;
     const { readings } = await getReadingsByProfileId(supabase, profileId, {
       startDate,
       endDate,
       context,
-      perPage: 10000, // Large number to get all readings
+      perPage: MAX_READINGS_FOR_STATS,
     });
 
     if (readings.length === 0) {
