@@ -354,6 +354,23 @@ export interface PatientAccessible {
 }
 
 // ============================================================================
+// Response Types - Health Check
+// ============================================================================
+
+/**
+ * Health check response (no ApiResponse wrapper for simpler monitoring)
+ */
+export interface HealthCheckResponse {
+  status: 'healthy' | 'unhealthy';
+  timestamp: string;                   // ISO 8601 timestamp
+  checks: {
+    database: 'connected' | 'error';
+    auth: 'configured' | 'error';
+  };
+  version: string;                     // API version
+}
+
+// ============================================================================
 // Error Types
 // ============================================================================
 
