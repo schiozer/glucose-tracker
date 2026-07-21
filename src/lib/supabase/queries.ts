@@ -213,6 +213,31 @@ export async function getThresholdsByProfileId(
 }
 
 /**
+ * Get a single glucose threshold by ID
+ *
+ * @param supabase - Supabase client instance
+ * @param thresholdId - Threshold ID to fetch
+ * @returns Glucose threshold or null if not found
+ */
+export async function getThresholdById(
+  supabase: SupabaseClient,
+  thresholdId: string
+): Promise<GlucoseThreshold | null> {
+  const { data, error } = await supabase
+    .from('glucose_thresholds')
+    .select('*')
+    .eq('id', thresholdId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
+
+  return data;
+}
+
+/**
  * Get glucose threshold for a specific profile and context
  *
  * @param supabase - Supabase client instance

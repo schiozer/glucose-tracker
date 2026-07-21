@@ -205,9 +205,9 @@ export const updateReadingSchema = z.object({
 // ============================================================================
 
 /**
- * Update threshold request schema with order validation
+ * Base threshold values schema with order validation
  */
-export const updateThresholdSchema = z.object({
+const thresholdValuesSchema = z.object({
   low: glucoseValueSchema,
   target_min: glucoseValueSchema,
   target_max: glucoseValueSchema,
@@ -219,9 +219,9 @@ export const updateThresholdSchema = z.object({
     path: ['low']
   }
 ).refine(
-  (data) => data.target_min < data.target_max,
+  (data) => data.target_min <= data.target_max,
   {
-    message: 'Alvo mínimo deve ser menor que o alvo máximo',
+    message: 'Alvo mínimo deve ser menor ou igual ao alvo máximo',
     path: ['target_min']
   }
 ).refine(
@@ -231,6 +231,19 @@ export const updateThresholdSchema = z.object({
     path: ['target_max']
   }
 );
+
+/**
+ * Create threshold request schema
+ */
+export const createThresholdSchema = thresholdValuesSchema.extend({
+  profile_id: uuidSchema,
+  context: glucoseContextSchema,
+});
+
+/**
+ * Update threshold request schema with order validation
+ */
+export const updateThresholdSchema = thresholdValuesSchema;
 
 // ============================================================================
 // Reminder Schemas
@@ -373,6 +386,7 @@ export type CreateProfileInput = z.infer<typeof createProfileSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type CreateReadingInput = z.infer<typeof createReadingSchema>;
 export type UpdateReadingInput = z.infer<typeof updateReadingSchema>;
+export type CreateThresholdInput = z.infer<typeof createThresholdSchema>;
 export type UpdateThresholdInput = z.infer<typeof updateThresholdSchema>;
 export type CreateReminderInput = z.infer<typeof createReminderSchema>;
 export type UpdateReminderInput = z.infer<typeof updateReminderSchema>;

@@ -136,7 +136,19 @@ export interface UpdateProfileRequest {
 // ============================================================================
 
 /**
- * Request to create or update glucose thresholds
+ * Request to create a new glucose threshold
+ */
+export interface CreateThresholdRequest {
+  profile_id: string;               // Profile ID
+  context: GlucoseContext;          // Context for this threshold
+  low: number;                      // mg/dL (must be < target_min)
+  target_min: number;               // mg/dL (must be < target_max)
+  target_max: number;               // mg/dL (must be < high)
+  high: number;                     // mg/dL (must be > target_max)
+}
+
+/**
+ * Request to update glucose thresholds
  */
 export interface UpdateThresholdRequest {
   low: number;                      // mg/dL (must be < target_min)
