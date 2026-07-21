@@ -17,12 +17,14 @@ import { ApiErrorCode } from '@/types/api';
  * User has access if they are:
  * - The profile owner (user_id matches)
  * - A caregiver with active access
+ *
+ * Returns the profile if found to avoid redundant queries
  */
 async function checkProfileAccess(
   supabase: ReturnType<typeof createServerClient>,
   userId: string,
   profileId: string
-): Promise<{ hasAccess: boolean; accessLevel?: 'owner' | 'read' | 'write' }> {
+): Promise<{ hasAccess: boolean; accessLevel?: 'owner' | 'read' | 'write'; profile?: Profile }> {
   // Check if user is the profile owner
   const profile = await getProfileById(supabase, profileId);
 
@@ -31,7 +33,7 @@ async function checkProfileAccess(
   }
 
   if (profile.user_id === userId) {
-    return { hasAccess: true, accessLevel: 'owner' };
+    return { hasAccess: true, accessLevel: 'owner', profile };
   }
 
   // Check caregiver access
@@ -50,6 +52,7 @@ async function checkProfileAccess(
   return {
     hasAccess: true,
     accessLevel: caregiverAccess.access_level as 'read' | 'write',
+    profile,
   };
 }
 
@@ -86,25 +89,9 @@ export async function GET(
     // Get profile ID from URL params
     const { id: profileId } = await context.params;
 
-    // Check access
+    // Check access and fetch profile
     const supabase = createServerClient();
-    const { hasAccess } = await checkProfileAccess(supabase, userId, profileId);
-
-    if (!hasAccess) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: {
-            code: ApiErrorCode.FORBIDDEN,
-            message: 'Acesso negado a este perfil',
-          },
-        },
-        { status: 403 }
-      );
-    }
-
-    // Fetch profile
-    const profile = await getProfileById(supabase, profileId);
+    const { hasAccess, profile } = await checkProfileAccess(supabase, userId, profileId);
 
     if (!profile) {
       return NextResponse.json(
@@ -116,6 +103,19 @@ export async function GET(
           },
         },
         { status: 404 }
+      );
+    }
+
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: ApiErrorCode.FORBIDDEN,
+            message: 'Acesso negado a este perfil',
+          },
+        },
+        { status: 403 }
       );
     }
 
@@ -173,13 +173,26 @@ export async function PATCH(
     // Get profile ID from URL params
     const { id: profileId } = await context.params;
 
-    // Check access
+    // Check access and fetch profile
     const supabase = createServerClient();
-    const { hasAccess, accessLevel } = await checkProfileAccess(
+    const { hasAccess, accessLevel, profile } = await checkProfileAccess(
       supabase,
       userId,
       profileId
     );
+
+    if (!profile) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: ApiErrorCode.NOT_FOUND,
+            message: 'Perfil não encontrado',
+          },
+        },
+        { status: 404 }
+      );
+    }
 
     if (!hasAccess || (accessLevel !== 'owner' && accessLevel !== 'write')) {
       return NextResponse.json(
@@ -296,11 +309,24 @@ export async function DELETE(
 
     // Check access - only owner can delete
     const supabase = createServerClient();
-    const { hasAccess, accessLevel } = await checkProfileAccess(
+    const { hasAccess, accessLevel, profile } = await checkProfileAccess(
       supabase,
       userId,
       profileId
     );
+
+    if (!profile) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: ApiErrorCode.NOT_FOUND,
+            message: 'Perfil não encontrado',
+          },
+        },
+        { status: 404 }
+      );
+    }
 
     if (!hasAccess || accessLevel !== 'owner') {
       return NextResponse.json(
@@ -335,15 +361,8 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        meta: {
-          timestamp: new Date().toISOString(),
-        },
-      },
-      { status: 204 }
-    );
+    // Return 204 No Content with no body per RFC 7231
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error('Error deleting profile:', error);
     return NextResponse.json(
