@@ -26,3 +26,9 @@ Task 15: complete (commit ba7da38, 6 files - reports page with preview + CSV exp
 Task 16: complete (commit b5a39fb, 5 files - threshold configuration page)
 Task 17: complete (commit 928b7c7, Vitest setup + 74 unit tests passing)
 Task 18: complete (Playwright E2E setup + 25 smoke tests passing)
+Task 19: complete (GitHub Actions CI/CD pipeline + Dependabot)
+Task 20: complete (Vercel config + deploy guide PT-BR)
+
+## MVP COMPLETE 🎉
+
+Note: git history rewritten on 2026-07-28 to purge .alura.txt (secrets) — commit hashes above are pre-rewrite references.

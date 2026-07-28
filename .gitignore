@@ -29,6 +29,9 @@ yarn-error.log*
 .env*.local
 .env
 
+# secrets / credentials (never commit)
+.alura.txt
+
 # vercel
 .vercel
 
